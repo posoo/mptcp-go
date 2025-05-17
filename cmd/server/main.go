@@ -47,6 +47,19 @@ func main() {
 func handleConnection(conn net.Conn) {
 	log.Printf("[%s] New connection from %s\n", time.Now().Format("15:04:05"), conn.RemoteAddr())
 
+	// Check if the connection is MPTCP
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		isMptcp, err := tcpConn.MultipathTCP()
+		if err != nil {
+			log.Printf("[%s] Error checking MPTCP: %v\n", time.Now().Format("15:04:05"), err)
+		}
+		if isMptcp {
+			log.Printf("[%s] Connection is using MPTCP\n", time.Now().Format("15:04:05"))
+		} else {
+			log.Printf("[%s] Connection is using regular TCP (MPTCP fallback)\n", time.Now().Format("15:04:05"))
+		}
+	}
+
 	buffer := make([]byte, 1024)
 	for {
 		n, err := conn.Read(buffer)
