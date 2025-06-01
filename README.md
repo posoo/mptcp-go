@@ -24,7 +24,7 @@ Therefore, we set up the client with multiple `subflow` endpoints as follows:
 ```bash
 # subsitute with your actual devices and IP addresses
 sudo ip mptcp endpoint add 10.0.1.4 dev eth0 id 1 subflow
-sudo ip mptcp endpoint add 10.0.2.4 dev eth0 id 1 subflow
+sudo ip mptcp endpoint add 10.0.2.4 dev eth1 id 2 subflow
 ```
 
 ## References
