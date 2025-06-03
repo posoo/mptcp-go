@@ -27,9 +27,20 @@ sudo ip mptcp endpoint add 10.0.1.4 dev eth0 id 1 subflow
 sudo ip mptcp endpoint add 10.0.2.4 dev eth1 id 2 subflow
 ```
 
+## MPTCP Checker
+
+Similar to [multipath-tcp/mptcp-check](https://github.com/multipath-tcp/mptcp-check), we developed a [webserver](/cmd/webserver) to verify whether an HTTP connection is established over MPTCP. 
+The difference is that our webserver directly acquires the MPTCP status from the underlying connection, rather than calling the `ss` command and parsing its output.
+
+In addition, we provide a [Dockerfile](/Dockerfile) to run the webserver in a container persistently.
+```bash
+docker build -t mptcp-checker .
+docker run -d --name mptcp-checker --restart=always -p 8684:8684 mptcp-checker
+```
+
 ## References
 - [ip-mptcp(8) — Linux manual page](https://www.mankier.com/8/ip-mptcp)
 - [mptcp.dev](https://www.mptcp.dev/)
-- [mptcpize - Man Page](https://www.mankier.com/8/mptcpize) - to enable MPTCP on existing servicesMPTCP
+- [mptcpize - Man Page](https://www.mankier.com/8/mptcpize) - to force applications to use MPTCP
     - `mptcpize run curl check.mptcp.dev`
 - [mptcpd - Man Page](https://www.mankier.com/8/mptcpd) - to perform MPTCP path management related operations
