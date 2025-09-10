@@ -7,9 +7,7 @@ import (
 	"net"
 	"os"
 	"strconv"
-	"syscall"
 	"time"
-	"unsafe"
 )
 
 func main() {
@@ -31,33 +29,7 @@ func main() {
 	}
 
 	// Initiate MPTCP connection
-	dialer := &net.Dialer{
-		Control: func(network, address string, c syscall.RawConn) error {
-			if *interfaceName != "" {
-				log.Printf("Binding to interface: %s", *interfaceName)
-				return c.Control(func(fd uintptr) {
-					// Use SO_BINDTODEVICE to bind to specific interface
-					// This is equivalent to curl's --interface option
-					interfaceBytes := []byte(*interfaceName)
-					_, _, errno := syscall.Syscall6(
-						syscall.SYS_SETSOCKOPT,
-						fd,
-						syscall.SOL_SOCKET,
-						syscall.SO_BINDTODEVICE,
-						uintptr(unsafe.Pointer(&interfaceBytes[0])),
-						uintptr(len(interfaceBytes)),
-						0,
-					)
-					if errno != 0 {
-						log.Printf("Warning: Failed to bind to interface %s: %v", *interfaceName, errno)
-					} else {
-						log.Printf("Successfully bound to interface: %s", *interfaceName)
-					}
-				})
-			}
-			return nil
-		},
-	}
+	dialer := createInterfaceDialer(*interfaceName)
 
 	if *noMptcp {
 		log.Println("Creating single TCP connection...")
@@ -66,7 +38,8 @@ func main() {
 		dialer.SetMultipathTCP(true)
 	}
 
-	conn, err := dialer.Dial("tcp", remoteAddr)
+	var conn net.Conn
+	conn, err = dialer.Dial("tcp", remoteAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
